@@ -341,8 +341,8 @@ if __name__ == '__main__':
             time_dependent_cums[random_t] += (perturbed_v * (1 - perturbed_v) * s[(None,) * (x.ndim - 1)] * (
                 gx_to_gv(perturbed_x_grad, perturbed_x)) ** 2).view(x.shape[0], -1).mean(dim=1).detach()
 
-        time_dependent_weights = time_dependent_cums / time_dependent_counts
-        time_dependent_weights = time_dependent_weights / time_dependent_weights.mean()
+    time_dependent_weights = time_dependent_cums / time_dependent_counts
+    time_dependent_weights = time_dependent_weights / time_dependent_weights.mean()
 
     plt.plot(torch.sqrt(time_dependent_weights.cpu()))
     plt.savefig("timedependent_weight.png")
