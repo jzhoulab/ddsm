@@ -6,7 +6,7 @@ This repo contains the official implementation for the paper [Dirichlet diffusio
 **Dirichlet Diffusion Score Model (DDSM)** is a continuous-time diffusion framework designed specificaly for modeling discrete data such as biological
 sequences. We introduce a diffusion process defined in probability simplex space with stationary distribution being the Dirichlet distribution. This makes diffusion in continuous space natural for modeling discrete data. DDSM is the first approach for discrete data modeling with continuous-time  stochastic differential equation (SDE) diffusion in probability simplex space.
 
-The Jax version of code will be published soon. 
+The Jax version of the code will be published soon. 
 
 Installation instructions
 ---------- 
@@ -16,7 +16,7 @@ If you plan to run TSS model, DDSM requires Selene (>=0.5.0). You can follow Sel
 
 Usage
 ---------- 
-TBA
+See [Usage file](Usage.md)
 
 Benchmarks
 ----------
@@ -43,8 +43,14 @@ Publications
 ------------
 Pavel Avdeyev, Chenlai Shi, Yuhao Tan, Kseniia Dudnyk and Jian Zhou. "Dirichlet diffusion score model for biological sequence generation". (details here) 
 
+If you use promoter designer model, you need to cite the following papers: 
+Chen, K. M., Wong, A. K., Troyanskaya, O. G., & Zhou, J. (2022). A sequence-based global map of regulatory activity for deciphering human genetics. Nature genetics, 54(7), 940-949. [https://doi.org/10.1038/s41588-022-01102-2](https://doi.org/10.1038/s41588-022-01102-2)  
+
+Chen, K.M., Cofer, E.M., Zhou, J. et al. Selene: a PyTorch-based deep learning library for sequence data. Nat Methods 16, 315–318 (2019). [https://doi.org/10.1038/s41592-019-0360-8](https://doi.org/10.1038/s41592-019-0360-8)
+
+
 How to get help
 ---------------
 A preferred way report any problems or ask questions about DDSM is the [issue tracker](https://github.com/jzhoulab/ddsm/issues). Before posting an issue/question, consider to look through the existing issues (opened and closed) - it is possible that your question has already been answered.
 
-In case you prefer personal communication, please contact Jian at (placeHolder)
+In case you prefer personal communication, please contact Jian at Jian.Zhou(at)UTSouthwestern.edu
