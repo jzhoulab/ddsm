@@ -10,7 +10,9 @@ The Jax version of the code will be published soon.
 
 Installation instructions
 ---------- 
-Please create a new conda or pip environment specifically for running DDSM. DDSM requires Python packages PyTorch (>=1.0). You can follow PyTorch installation steps [here](https://pytorch.org/get-started/locally/). 
+Please create a new conda or pip environment specifically for running DDSM.  
+
+DDSM requires Python packages PyTorch (>=1.0). You can follow PyTorch installation steps [here](https://pytorch.org/get-started/locally/). 
 
 If you plan to run TSS model, DDSM requires Selene (>=0.5.0). You can follow Selene installation steps [here](https://github.com/FunctionLab/selene).
 
@@ -20,9 +22,19 @@ See [Usage file](Usage.md)
 
 Benchmarks
 ----------
-TBA - biological sequences comparison
+The evaluation is based on comparing generated sequences and human genome promoter sequences (ground truth) on the test chromosomes.
+The metric SP-MSE is the MSE between the predicted promoter activity of generated sequences and human genome sequences (lower is better). Our model trained with DDSM outperforms models trained with other approaches:
 
-One can find more benchmarks on various datasets in our paper (doi here) 
+| Model                                 | SP-MSE $\downarrow$ |
+|---------------------------------------|---------------------|
+| **DDSM (time dilation 4x)**           | **0.0334**          |
+| DDSM (time dilation 2x)               | 0.0348              |
+| DDSM (time dilation 1x)               | 0.0363              |
+| D3PM-uniform / Multinomial Diffusion  | 0.0375              |
+| Bit Diffusion (one-hot encoding)      | 0.0395              |
+| Bit Diffusion (bit-encoding)          | 0.0414              | 
+
+One can find more benchmarks on various datasets in the paper (see Publications)
 
 
 License
@@ -43,7 +55,8 @@ Publications
 ------------
 Pavel Avdeyev, Chenlai Shi, Yuhao Tan, Kseniia Dudnyk and Jian Zhou. "Dirichlet diffusion score model for biological sequence generation". (details here) 
 
-If you use promoter designer model, you need to cite the following papers: 
+*If you use promoter designer model, you need to cite the following papers:*  
+
 Chen, K. M., Wong, A. K., Troyanskaya, O. G., & Zhou, J. (2022). A sequence-based global map of regulatory activity for deciphering human genetics. Nature genetics, 54(7), 940-949. [https://doi.org/10.1038/s41588-022-01102-2](https://doi.org/10.1038/s41588-022-01102-2)  
 
 Chen, K.M., Cofer, E.M., Zhou, J. et al. Selene: a PyTorch-based deep learning library for sequence data. Nat Methods 16, 315–318 (2019). [https://doi.org/10.1038/s41592-019-0360-8](https://doi.org/10.1038/s41592-019-0360-8)
