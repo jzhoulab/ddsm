@@ -1,7 +1,5 @@
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
-
 import tqdm
 import math
 import joblib
@@ -323,11 +321,11 @@ def binary_to_onehot(x):
 
 
 if __name__ == '__main__':
-    v_one, v_zero, v_one_loggrad, v_zero_loggrad, timepoints = torch.load('presampled_2C_maxt4.4000steps.100000.pth')
+    v_one, v_zero, v_one_loggrad, v_zero_loggrad, timepoints = torch.load('steps4000.cat2.time4.0.samples100000.pth')
     torch.set_default_dtype(torch.float32)
     alpha = torch.FloatTensor([1.0])
     beta = torch.FloatTensor([1.0])
-    timepoints = torch.FloatTensor(np.linspace(0, 4, 4001)[1:]).cuda()
+    timepoints = timepoints.cuda()
 
     score_model = ScoreNet(
         ch=128, ch_mult=[1, 2, 2, 2], attn=[1],
@@ -356,7 +354,7 @@ if __name__ == '__main__':
         tqdm_data = tqdm.tqdm(DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=4))
         for x in tqdm_data:
             x = binary_to_onehot(x).squeeze()
-            # perturbed_x = sb(Jacobi_Euler_Maruyama_sampler(x[...,0].cpu()*1.0,alpha,beta,min_time,1000,device='cpu')[...,None])
+
             perturbed_x, _ = diffusion_factory(x.cpu(), torch.zeros(x.shape[0]).long(), v_one, v_zero,
                                                v_one_loggrad, v_zero_loggrad, alpha, beta)
             # perturbed_x, _ = diffusion_fast_flatdirichlet(x.cpu(), min_time, v_one, v_one_loggrad)
