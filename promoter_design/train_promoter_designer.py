@@ -10,6 +10,12 @@ import pyBigWig
 import pandas as pd
 from matplotlib import pyplot as plt
 
+"""
+Please cite this if you used Selene in your research.
+Chen, K .M., Cofer, E. M., Zhou, J. et al. Selene: a PyTorch-based deep learning 
+library for sequence data. Nat Methods 16, 315–318 (2019). 
+[https://doi.org/10.1038/s41592-019-0360-8](https://doi.org/10.1038/s41592-019-0360-8)
+"""
 from selene_sdk.utils import NonStrandSpecific
 from selene_sdk.targets import Target
 
@@ -283,7 +289,12 @@ if __name__ == '__main__':
     config = ModelParameters()
 
     sb = UnitStickBreakingTransform()
-
+    """
+    Sei model is published in the following paper
+    Chen, K. M., Wong, A. K., Troyanskaya, O. G., & Zhou, J. (2022). A sequence-based global map of 
+    regulatory activity for deciphering human genetics. Nature genetics, 54(7), 940-949. 
+    [https://doi.org/10.1038/s41588-022-01102-2](https://doi.org/10.1038/s41588-022-01102-2)  
+    """
     seifeatures = pd.read_csv(config.seifeatures_file, sep='|', header=None)
 
     sei = nn.DataParallel(NonStrandSpecific(Sei(4096, 21907)))
