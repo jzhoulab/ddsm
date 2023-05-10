@@ -27,12 +27,21 @@ logger = logging.getLogger()
 
 
 class ModelParameters:
-    seifeatures_file = '/archive/bioinformatics/Zhou_lab/shared/jzhou/sei-framework/model/target.names'
-    seimodel_file = '/archive/bioinformatics/Zhou_lab/shared/jzhou/cistrome/2019-07-25-13-21-44-IY28BMRY/best_model.pth.tar'
+    seifeatures_file = '../data/target.sei.names'
+    seimodel_file = '../data/best.sei.model.pth.tar'
 
-    ref_file = '/archive/bioinformatics/Zhou_lab/shared/jzhou/GraphSeq/Homo_sapiens.GRCh38.dna.primary_assembly.fa'
-    ref_file_mmap = '/archive/bioinformatics/Zhou_lab/shared/jzhou/GraphSeq/Homo_sapiens.GRCh38.dna.primary_assembly.fa.mmap'
-    tsses_file = '/archive/bioinformatics/Zhou_lab/shared/jzhou/FANTOM/analysis/FANTOM_CAT.lv3_robust.tss.sortedby_fantomcage.hg38.v4.tsv'
+    ref_file = '../data/Homo_sapiens.GRCh38.dna.primary_assembly.fa'
+    ref_file_mmap = '../data/Homo_sapiens.GRCh38.dna.primary_assembly.fa.mmap'
+    tsses_file = '../data/FANTOM_CAT.lv3_robust.tss.sortedby_fantomcage.hg38.v4.tsv'
+
+    fantom_files = [
+                    "../data/agg.plus.bw.bedgraph.bw",
+                    "../data/agg.minus.bw.bedgraph.bw"
+                    ]
+    fantom_blacklist_files = [
+         "../data/fantom.blacklist8.plus.bed.gz",
+         "../data/fantom.blacklist8.minus.bed.gz"
+        ]
 
     diffusion_weights_file = 'steps400.cat4.speed_balance.time4.0.samples100000.pth'
 
@@ -119,25 +128,22 @@ class GenomicSignalFeatures(Target):
 
 
 class TSSDatasetS(Dataset):
-    def __init__(self, seqlength=1024, split="train", n_tsses=100000, rand_offset=0):
+    def __init__(self, config, seqlength=1024, split="train", n_tsses=100000, rand_offset=0):
         self.shuffle = False
 
         self.genome = MemmapGenome(
-            input_path='/archive/bioinformatics/Zhou_lab/shared/jzhou/GraphSeq/Homo_sapiens.GRCh38.dna.primary_assembly.fa',
-            memmapfile='/archive/bioinformatics/Zhou_lab/shared/jzhou/GraphSeq/Homo_sapiens.GRCh38.dna.primary_assembly.fa.mmap',
+            input_path=config.ref_file,
+            memmapfile=config.ref_file_mmap,
             blacklist_regions='hg38'
         )
         self.tfeature = GenomicSignalFeatures(
-            ["/archive/bioinformatics/Zhou_lab/shared/jzhou/FANTOM/agg.plus.bw.bedgraph.bw",
-             "/archive/bioinformatics/Zhou_lab/shared/jzhou/FANTOM/agg.minus.bw.bedgraph.bw"],
+            config.fantom_files,
             ['cage_plus', 'cage_minus'],
             (2000,),
-            ["/archive/bioinformatics/Zhou_lab/shared/jzhou/FANTOM/fantom.blacklist8.plus.bed.gz",
-             "/archive/bioinformatics/Zhou_lab/shared/jzhou/FANTOM/fantom.blacklist8.minus.bed.gz"])
+            config.fantom_blacklist_files
+        )
 
-        self.tsses = pd.read_table(
-            '/archive/bioinformatics/Zhou_lab/shared/jzhou/FANTOM/analysis/FANTOM_CAT.lv3_robust.tss.sortedby_fantomcage.hg38.v4.tsv',
-            sep='\t')
+        self.tsses = pd.read_table(config.tsses_file, sep='\t')
         self.tsses = self.tsses.iloc[:n_tsses, :]
 
         self.chr_lens = self.genome.get_chr_lens()
@@ -297,7 +303,7 @@ if __name__ == '__main__':
     ### TIME DEPENDENT WEIGHTS ###
     torch.set_default_dtype(torch.float32)
 
-    train_set = TSSDatasetS(n_tsses=40000, rand_offset=10)
+    train_set = TSSDatasetS(config, n_tsses=40000, rand_offset=10)
     data_loader = DataLoader(train_set, batch_size=config.batch_size, shuffle=True, num_workers=config.num_workers)
 
     time_dependent_cums = torch.zeros(config.n_time_steps).to(config.device)
@@ -354,7 +360,7 @@ if __name__ == '__main__':
     plt.savefig("timedependent_weight.png")
 
     #### PREPARE Valid DATASET
-    valid_set = TSSDatasetS(split='valid', n_tsses=40000, rand_offset=0)
+    valid_set = TSSDatasetS(config, split='valid', n_tsses=40000, rand_offset=0)
     valid_data_loader = DataLoader(valid_set, batch_size=config.batch_size, shuffle=False, num_workers=0)
     valid_datasets = []
     for x in valid_data_loader:
@@ -383,7 +389,7 @@ if __name__ == '__main__':
     score_model = score_model.to(config.device)
     score_model.train()
 
-    train_set = TSSDatasetS(n_tsses=40000, rand_offset=100)
+    train_set = TSSDatasetS(config, n_tsses=40000, rand_offset=100)
     data_loader = DataLoader(train_set, batch_size=config.batch_size, shuffle=True, num_workers=config.num_workers)
     sampler = Euler_Maruyama_sampler
 
