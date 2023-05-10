@@ -13,9 +13,13 @@ from matplotlib import pyplot as plt
 from selene_sdk.utils import NonStrandSpecific
 from selene_sdk.targets import Target
 
+import sys
+sys.path.append("../")
+sys.path.append("../external/")
+
+from ddsm import *
 from sei import *
-from selene_utils2 import *
-from ddsm_lib import *
+from selene_utils import *
 
 import logging
 
@@ -30,7 +34,7 @@ class ModelParameters:
     ref_file_mmap = '/archive/bioinformatics/Zhou_lab/shared/jzhou/GraphSeq/Homo_sapiens.GRCh38.dna.primary_assembly.fa.mmap'
     tsses_file = '/archive/bioinformatics/Zhou_lab/shared/jzhou/FANTOM/analysis/FANTOM_CAT.lv3_robust.tss.sortedby_fantomcage.hg38.v4.tsv'
 
-    diffusion_weights_file = '/archive/bioinformatics/Zhou_lab/shared/pavdeyev/notebooks/sde/golden_promoter/presampled_4C_maxt4.speed_balanced.100000.pth'
+    diffusion_weights_file = 'steps400.cat4.speed_balance.time4.0.samples100000.pth'
 
     device = 'cuda'
     batch_size = 256
@@ -281,10 +285,12 @@ if __name__ == '__main__':
     sei.cuda()
 
     ### LOAD WEIGHTS
-    d = torch.load(config.diffusion_weights_file)
-    for k in d:
-        globals()[k] = d[k]
-
+    v_one, v_zero, v_one_loggrad, v_zero_loggrad, timepoints = torch.load(config.diffusion_weights_file)
+    v_one = v_one.cpu()
+    v_zero = v_zero.cpu()
+    v_one_loggrad = v_one_loggrad.cpu()
+    v_zero_loggrad = v_zero_loggrad.cpu()
+    timepoints = timepoints.cpu()
     alpha = torch.ones(config.ncat - 1).float()
     beta =  torch.arange(config.ncat - 1, 0, -1).float()
 
@@ -349,7 +355,7 @@ if __name__ == '__main__':
 
     #### PREPARE Valid DATASET
     valid_set = TSSDatasetS(split='valid', n_tsses=40000, rand_offset=0)
-    valid_data_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=0)
+    valid_data_loader = DataLoader(valid_set, batch_size=config.batch_size, shuffle=False, num_workers=0)
     valid_datasets = []
     for x in valid_data_loader:
         valid_datasets.append(x)
@@ -399,8 +405,8 @@ if __name__ == '__main__':
             # Optional : there are several options for importance sampling here. it needs to match the loss function
             random_t = torch.LongTensor(np.random.choice(np.arange(config.n_time_steps), size=x.shape[0],
                                                          p=(torch.sqrt(time_dependent_weights) / torch.sqrt(
-                                                             time_dependent_weights).sum()).cpu().detach().numpy())).to(
-                config.device)
+                                                             time_dependent_weights).sum()).cpu().detach().numpy()))
+
             if config.random_order:
                 order = np.random.permutation(np.arange(C))
                 # perturbed_x, perturbed_x_grad = diffusion_fast_flatdirichlet(x[...,order], random_t, v_one, v_one_loggrad)
@@ -410,14 +416,15 @@ if __name__ == '__main__':
                 perturbed_x = perturbed_x[..., np.argsort(order)]
                 perturbed_x_grad = perturbed_x_grad[..., np.argsort(order)]
             else:
-                perturbed_x, perturbed_x_grad = diffusion_fast_flatdirichlet(x, random_t, v_one, v_one_loggrad)
+                perturbed_x, perturbed_x_grad = diffusion_fast_flatdirichlet(x.cpu(), random_t, v_one, v_one_loggrad)
                 # perturbed_x, perturbed_x_grad = diffusion_factory(x, random_t, v_one, v_zero, v_one_loggrad, v_zero_loggrad, alpha, beta)
 
             perturbed_x = perturbed_x.to(config.device)
             perturbed_x_grad = perturbed_x_grad.to(config.device)
-            random_t = random_t.to(config.device)
+            random_timepoints = timepoints[random_t].to(config.device)
 
-            random_timepoints = timepoints[random_t]
+            # random_t = random_t.to(config.device)
+
             s = s.to(config.device)
 
             score = score_model(torch.cat([perturbed_x, s], -1), random_timepoints)

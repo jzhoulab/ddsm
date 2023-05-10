@@ -548,7 +548,7 @@ def Euler_Maruyama_sampler(
     if random_order:
         order = np.arange(sample_shape[-1])
     with torch.no_grad():
-        for i_step in tqdm.notebook.tqdm(range(len(time_steps))):
+        for i_step in tqdm.tqdm(range(len(time_steps))):
             time_step = time_steps[i_step]
             step_size = step_sizes[i_step]
             x = sb(v)
