@@ -16,7 +16,7 @@ DDSM requires Python packages PyTorch (>=1.0). You can follow PyTorch installati
 
 If you plan to run TSS model, DDSM requires Selene (>=0.5.0). You can follow Selene installation steps [here](https://github.com/FunctionLab/selene).
 
-Usage
+Tutorial
 ---------- 
 An example notebook containing code for applying a toy model to binarized MNIST dataset is [here](https://github.com/jzhoulab/ddsm/blob/main/toy_example_bin_mnist.ipynb).
 
