@@ -18,7 +18,7 @@ If you plan to run TSS model, DDSM requires Selene (>=0.5.0). You can follow Sel
 
 Usage
 ---------- 
-See [Usage file](Usage.md)
+An example notebook containing code for applying a toy model to binarized MNIST dataset is [here](https://github.com/jzhoulab/ddsm/blob/main/toy_example_bin_mnist.ipynb).
 
 Benchmarks
 ----------
@@ -53,14 +53,7 @@ DDSM is developed in [Jian Zhou's lab at UTSW](https://zhoulab.io/).
 
 Publications
 ------------
-Pavel Avdeyev, Chenlai Shi, Yuhao Tan, Kseniia Dudnyk and Jian Zhou. "Dirichlet diffusion score model for biological sequence generation". (details here) 
-
-*If you use promoter designer model, you need to cite the following papers:*  
-
-Chen, K. M., Wong, A. K., Troyanskaya, O. G., & Zhou, J. (2022). A sequence-based global map of regulatory activity for deciphering human genetics. Nature genetics, 54(7), 940-949. [https://doi.org/10.1038/s41588-022-01102-2](https://doi.org/10.1038/s41588-022-01102-2)  
-
-Chen, K.M., Cofer, E.M., Zhou, J. et al. Selene: a PyTorch-based deep learning library for sequence data. Nat Methods 16, 315–318 (2019). [https://doi.org/10.1038/s41592-019-0360-8](https://doi.org/10.1038/s41592-019-0360-8)
-
+Pavel Avdeyev, Chenlai Shi, Yuhao Tan, Kseniia Dudnyk and Jian Zhou. "Dirichlet diffusion score model for biological sequence generation".
 
 How to get help
 ---------------
