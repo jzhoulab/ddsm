@@ -11,8 +11,9 @@ from torch.nn import functional as F
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 
-
-from ddsm_lib import *
+import sys 
+sys.path.append("../")
+from ddsm import *
 
 def worker_init_fn(worker_id):
     np.random.seed(worker_id)
@@ -208,7 +209,7 @@ class Dense(nn.Module):
 class ScoreNet(nn.Module):
     """A time-dependent score-based model built upon U-Net architecture."""
 
-    def __init__(self, embed_dim=256):
+    def __init__(self, allenc_relative, embed_dim=256):
         """Initialize a time-dependent score-based network.
 
         Args:
@@ -247,15 +248,72 @@ class ScoreNet(nn.Module):
         h = h - h.mean(axis=-1, keepdims=True)
         return h
 
+
+def define_relative_encoding(): 
+    colind = np.array([
+                    [0,1,2,3,4,5,6,7,8],
+                    [0,1,2,3,4,5,6,7,8],
+                    [0,1,2,3,4,5,6,7,8],
+                    [0,1,2,3,4,5,6,7,8],
+                    [0,1,2,3,4,5,6,7,8],
+                    [0,1,2,3,4,5,6,7,8],
+                    [0,1,2,3,4,5,6,7,8],
+                    [0,1,2,3,4,5,6,7,8],
+                    [0,1,2,3,4,5,6,7,8]
+    ])
+
+    rowind = np.array([
+                [0,0,0,0,0,0,0,0,0],
+                [1,1,1,1,1,1,1,1,1],
+                [2,2,2,2,2,2,2,2,2],
+                [3,3,3,3,3,3,3,3,3],
+                [4,4,4,4,4,4,4,4,4],
+                [5,5,5,5,5,5,5,5,5],
+                [6,6,6,6,6,6,6,6,6],
+                [7,7,7,7,7,7,7,7,7],
+                [8,8,8,8,8,8,8,8,8]
+    ])
+
+
+    blockind = np.array([
+                [0,0,0,1,1,1,2,2,2],
+                [0,0,0,1,1,1,2,2,2],
+                [0,0,0,1,1,1,2,2,2],
+                [3,3,3,4,4,4,5,5,5],
+                [3,3,3,4,4,4,5,5,5],
+                [3,3,3,4,4,4,5,5,5],
+                [6,6,6,7,7,7,8,8,8],
+                [6,6,6,7,7,7,8,8,8],
+                [6,6,6,7,7,7,8,8,8]
+    ])
+
+    colenc = np.zeros((81, 9))
+    rowenc = np.zeros((81, 9))
+    blockenc = np.zeros((81, 9))
+    colenc[np.arange(81), colind.flatten()] = 1
+    rowenc[np.arange(81), rowind.flatten()] = 1
+    blockenc[np.arange(81),blockind.flatten()] = 1
+    allenc = np.concatenate([colenc, rowenc, blockenc], axis=1)
+    return torch.FloatTensor(allenc[:,None,:] == allenc[None,:,:])
+
 if __name__ == "__main__":
     device = 'cuda'
     batch_size = 256
     num_workers = 16
-    sb = UnitStickBreakingTransform()
+
     lr = 1e-4
     num_steps = 500
     n_epochs = 600
     random_order = False
+
+    v_one, v_zero, v_one_loggrad, v_zero_loggrad, timepoints =  torch.load('steps400.cat9.time1.0.samples100000.pth') 
+    n_timesteps = timepoints.shape[0]
+    alpha = torch.FloatTensor([1.0])
+    beta = torch.FloatTensor([1.0])
+    torch.set_default_dtype(torch.float32)
+
+
+    sb = UnitStickBreakingTransform()
 
     # Estimate timepoints
     train_dataloader = DataLoader(SudokuDataset(batch_size),
@@ -263,14 +321,14 @@ if __name__ == "__main__":
                                   num_workers=num_workers,
                                   worker_init_fn=worker_init_fn)
 
-    time_dependent_cums = torch.zeros(400).to(device)
-    time_dependent_counts = torch.zeros(400).to(device)
+    time_dependent_cums = torch.zeros(n_timesteps).to(device)
+    time_dependent_counts = torch.zeros(n_timesteps).to(device)
 
     avg_loss = 0.
     num_items = 0
     for i, x in enumerate(train_dataloader):
         x = x.reshape(-1, 9, 9, 9)
-        random_t = torch.randint(0, 400, (x.shape[0],))
+        random_t = torch.randint(0, n_timesteps, (x.shape[0],))
         order = np.random.permutation(np.arange(9))
         perturbed_x, perturbed_x_grad = diffusion_fast_flatdirichlet(x[..., order], random_t, v_one, v_one_loggrad)
         perturbed_x = perturbed_x[..., np.argsort(order)]
@@ -297,7 +355,7 @@ if __name__ == "__main__":
     plt.savefig("timedependent_weight.png")
 
     # Train code
-    score_model = ScoreNet()
+    score_model = ScoreNet(define_relative_encoding())
     score_model = score_model.to('cuda')
     optimizer = Adam(score_model.parameters(), lr=lr)
 
@@ -305,7 +363,6 @@ if __name__ == "__main__":
                                   batch_size, shuffle=True,
                                   num_workers=num_workers,
                                   worker_init_fn=worker_init_fn)
-    timepoints = torch.FloatTensor(np.linspace(0, 1, 400 + 1)[1:]).to(device)
 
     tqdm_epoch = tqdm.trange(n_epochs)
     j = 0
@@ -316,10 +373,9 @@ if __name__ == "__main__":
         for dataset in train_dataloader:
 
             x = dataset.reshape(-1, 9, 9, 9)
-            # random_t = torch.LongTensor(np.random.choice(np.arange(400), size=x.shape[0])).to(device)
-            random_t = torch.LongTensor(np.random.choice(np.arange(400), size=x.shape[0], p=(
-                        time_dependent_weights / time_dependent_weights.sum()).cpu().detach().numpy())).to(device)
-            #         perturbed_x, perturbed_x_grad = diffusion_factory(x, random_t,  v_one, v_zero,v_one_loggrad, v_zero_loggrad, alpha, beta)
+            random_t = torch.LongTensor(np.random.choice(np.arange(n_timesteps), size=x.shape[0], p=(
+                        time_dependent_weights / time_dependent_weights.sum()).cpu().detach().numpy()))
+
             order = np.random.permutation(np.arange(9))
             if random_order:
                 perturbed_x, perturbed_x_grad = diffusion_fast_flatdirichlet(x[..., order], random_t, v_one,
@@ -328,12 +384,13 @@ if __name__ == "__main__":
                 perturbed_x_grad = perturbed_x_grad[..., np.argsort(order)]
             else:
                 perturbed_x, perturbed_x_grad = diffusion_fast_flatdirichlet(x, random_t, v_one, v_one_loggrad)
+
             perturbed_x = perturbed_x.to(device)
             perturbed_x_grad = perturbed_x_grad.to(device)
-            random_t = random_t.to(device)
 
-            score = score_model(perturbed_x, timepoints[random_t])
-           g order = np.random.permutation(np.arange(9))
+            score = score_model(perturbed_x, timepoints[random_t].to(device))
+            order = np.random.permutation(np.arange(9))
+
             if random_order:
                 perturbed_v = sb._inverse(perturbed_x[..., order], prevent_nan=True).detach()
                 loss = torch.mean(torch.mean(
@@ -354,7 +411,6 @@ if __name__ == "__main__":
             avg_loss += loss.item() * x.shape[0]
             num_items += x.shape[0]
 
-        print(j)
         print('Training loss', avg_loss / num_items)
 
         sampler = Euler_Maruyama_sampler
@@ -366,7 +422,7 @@ if __name__ == "__main__":
                           max_time=1,
                           time_dilation=1,
                           num_steps=200,
-                          random_order=True,
+                          random_order=False,
                           device=device)
         sudoku_acc(samples)
         j += 1
