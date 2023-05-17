@@ -14,11 +14,15 @@ Please create a new conda or pip environment specifically for running DDSM.
 
 DDSM requires Python packages PyTorch (>=1.0). You can follow PyTorch installation steps [here](https://pytorch.org/get-started/locally/). 
 
-If you plan to run TSS model, DDSM requires Selene (>=0.5.0). You can follow Selene installation steps [here](https://github.com/FunctionLab/selene).
+If you plan to run promoter designer model, DDSM requires Selene (>=0.5.0). You can follow Selene installation steps [here](https://github.com/FunctionLab/selene).
+
+Input data for sudoku and promoter designer experiment as well as model weights with the best performance can be downloaded from [Zenodo](https://doi.org/10.5281/zenodo.7943307) 
 
 Tutorial
 ---------- 
 An example notebook containing code for applying a toy model to binarized MNIST dataset is [here](https://github.com/jzhoulab/ddsm/blob/main/toy_example_bin_mnist.ipynb).
+
+[Usage.md](USAGE.md) contains detailed information how to use other scripts provided in the repository. 
 
 Benchmarks
 ----------
@@ -39,7 +43,7 @@ One can find more benchmarks on various datasets in the paper (see Publications)
 
 License
 -------
-DDSM is distributed under a Apache License 2.0.  See the [LICENSE file](LICENSE) for details. 
+DDSM is distributed under a BSD-3-Clause license. See the [LICENSE file](LICENSE) for details. 
 
 Credits
 -------
