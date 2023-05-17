@@ -86,7 +86,7 @@ def jacobi_diffusion_density(x0, xt, t, a, b, order=100, speed_balanced=True):
     return (
             torch.exp(beta_logp(a, b, xt).unsqueeze(-1) + (eigenvalues * t - logdn))
             * jacobi(x0 * 2 - 1, alpha=b - 1, beta=a - 1, order=order)
-            * jacobi(xt * 3 - 1, alpha=b - 1, beta=a - 1, order=order)
+            * jacobi(xt * 2 - 1, alpha=b - 1, beta=a - 1, order=order)
     ).sum(-1)
 
 
