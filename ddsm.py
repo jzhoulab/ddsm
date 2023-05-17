@@ -86,7 +86,7 @@ def jacobi_diffusion_density(x0, xt, t, a, b, order=100, speed_balanced=True):
     return (
             torch.exp(beta_logp(a, b, xt).unsqueeze(-1) + (eigenvalues * t - logdn))
             * jacobi(x0 * 2 - 1, alpha=b - 1, beta=a - 1, order=order)
-            * jacobi(xt * 2 - 1, alpha=b - 1, beta=a - 1, order=order)
+            * jacobi(xt * 3 - 1, alpha=b - 1, beta=a - 1, order=order)
     ).sum(-1)
 
 
@@ -453,6 +453,7 @@ def Euler_Maruyama_sampler(
         device="cuda",
         random_order=False,
         speed_balanced=True,
+        speed_factor=None,
         concat_input=None,
         eps=1e-5,
 ):
@@ -510,18 +511,21 @@ def Euler_Maruyama_sampler(
         )
 
     if speed_balanced:
-        s = 2.0 / (alpha + beta)
+        if speed_factor is None:
+            s = 2.0 / (alpha + beta)
+        else:
+            s = speed_factor * 2.0 / (alpha + beta)
     else:
         s = torch.ones(sample_shape[-1] - 1).to(device)
 
     if init is None:
         init_v = Beta(alpha, beta).sample((batch_size,) + sample_shape[:-1]).to(device)
     else:
-        init_v = sb.inv(init).to(device)
+        init_v = sb._inverse(init).to(device)
 
     if time_dilation_start_time is None:
         time_steps = torch.linspace(
-            max_time, min_time, (num_steps + 1) * time_dilation, device=device
+            max_time, min_time, num_steps * time_dilation + 1, device=device
         )
     else:
         time_steps = torch.cat(
@@ -543,10 +547,17 @@ def Euler_Maruyama_sampler(
         )
     step_sizes = time_steps[:-1] - time_steps[1:]
     time_steps = time_steps[:-1]
-
     v = init_v.detach()
+
+    if mask is not None:
+        assert mask.shape[-1] == v.shape[-1]+1
+
     if random_order:
         order = np.arange(sample_shape[-1])
+    else:
+        if mask is not None:
+            mask_v = sb.inv(mask)
+
     with torch.no_grad():
         for i_step in tqdm.tqdm(range(len(time_steps))):
             time_step = time_steps[i_step]
@@ -566,10 +577,12 @@ def Euler_Maruyama_sampler(
                 batch_time_step = torch.ones(batch_size, device=device) * time_step
 
                 with torch.enable_grad():
+
                     if concat_input is None:
                         score = score_model(x, batch_time_step)
                     else:
                         score = score_model(torch.cat([x, concat_input], -1), batch_time_step)
+
                     mean_v = (
                             v + s[(None,) * (v.ndim - 1)] * (
                             (0.5 * (alpha[(None,) * (v.ndim - 1)] * (1 - v)
@@ -580,14 +593,21 @@ def Euler_Maruyama_sampler(
 
                 next_v = mean_v + torch.sqrt(step_size * c) * \
                          torch.sqrt(s[(None,) * (v.ndim - 1)]) * g * torch.randn_like(v)
+
                 if mask is not None:
-                    next_v[~torch.isnan(mask)] = mask[~torch.isnan(mask)]
+                    next_v[~torch.isnan(mask_v)] = mask_v[~torch.isnan(mask_v)]
+
                 v = torch.clamp(next_v, eps, 1 - eps).detach()
             else:
                 x = x[..., np.argsort(order)]
                 order = np.random.permutation(np.arange(sample_shape[-1]))
+
+                if mask is not None:
+                    mask_v = sb.inv(mask[..., order])
+
                 v = sb._inverse(x[..., order], prevent_nan=True)
                 v = torch.clamp(v, eps, 1 - eps).detach()
+
                 g = torch.sqrt(v * (1 - v))
                 batch_time_step = torch.ones(batch_size, device=device) * time_step
 
@@ -609,11 +629,13 @@ def Euler_Maruyama_sampler(
                 ) * g * torch.randn_like(v)
 
                 if mask is not None:
-                    next_v[~torch.isnan(mask)] = mask[~torch.isnan(mask)]
+                    next_v[~torch.isnan(mask_v)] = mask_v[~torch.isnan(mask_v)]
+
                 v = torch.clamp(next_v, eps, 1 - eps).detach()
 
     if mask is not None:
-        mean_v[~torch.isnan(mask)] = mask[~torch.isnan(mask)]
+        mean_v[~torch.isnan(mask_v)] = mask_v[~torch.isnan(mask_v)]
+
     # Do not include any noise in the last sampling step.
     if not random_order:
         return sb(torch.clamp(mean_v, eps, 1 - eps))

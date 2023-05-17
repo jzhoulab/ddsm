@@ -309,7 +309,7 @@ if __name__ == "__main__":
     v_one, v_zero, v_one_loggrad, v_zero_loggrad, timepoints =  torch.load('steps400.cat9.time1.0.samples100000.pth') 
     n_timesteps = timepoints.shape[0]
     alpha = torch.FloatTensor([1.0])
-    beta = torch.FloatTensor([1.0])
+    beta = torch.FloatTensor([8.0])
     torch.set_default_dtype(torch.float32)
 
 
@@ -423,6 +423,7 @@ if __name__ == "__main__":
                           time_dilation=1,
                           num_steps=200,
                           random_order=False,
+                          speed_balanced=False,
                           device=device)
         sudoku_acc(samples)
         j += 1
