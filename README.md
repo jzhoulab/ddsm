@@ -1,7 +1,7 @@
 Dirichlet Diffusion Score Model 
 ==============
 
-This repo contains the official implementation for the paper [Dirichlet diffusion score model for biological sequence generation](doi_here). 
+This repo contains the official implementation for the paper [Dirichlet diffusion score model for biological sequence generation](https://arxiv.org/abs/2305.10699). 
 
 **Dirichlet Diffusion Score Model (DDSM)** is a continuous-time diffusion framework designed specificaly for modeling discrete data such as biological
 sequences. We introduce a diffusion process defined in probability simplex space with stationary distribution being the Dirichlet distribution. This makes diffusion in continuous space natural for modeling discrete data. DDSM is the first approach for discrete data modeling with continuous-time  stochastic differential equation (SDE) diffusion in probability simplex space.
