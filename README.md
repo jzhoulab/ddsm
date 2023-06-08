@@ -61,6 +61,6 @@ Pavel Avdeyev, Chenlai Shi, Yuhao Tan, Kseniia Dudnyk and Jian Zhou. "Dirichlet 
 
 How to get help
 ---------------
-A preferred way report any problems or ask questions about DDSM is the [issue tracker](https://github.com/jzhoulab/ddsm/issues). Before posting an issue/question, consider to look through the existing issues (opened and closed) - it is possible that your question has already been answered.
+The preferred way of asking questions about DDSM is the [discussions tab](https://github.com/jzhoulab/ddsm/discussions). Before posting an question, consider to look through the existing threads - it is possible that your question has already been answered. For report any bugs, please use the issues tracker.
 
-In case you prefer personal communication, please contact Jian at Jian.Zhou(at)UTSouthwestern.edu
+In case you prefer personal communication, please contact Pavel at Pavel.Avdeev(at)UTSouthwestern.edu or  Jian at Jian.Zhou(at)UTSouthwestern.edu.
