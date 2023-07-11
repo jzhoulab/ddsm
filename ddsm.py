@@ -364,10 +364,7 @@ def diffusion_factory(
     else:
         v_samples.requires_grad = True
         samples = sb(v_samples)
-        logdet = sb.log_abs_det_jacobian(v_samples, samples)
-        samples_grad = gv_to_gx(
-            v_samples_grad + grad(logdet.sum(), v_samples)[0], v_samples
-        )
+        samples_grad = gv_to_gx(v_samples_grad, v_samples)
         samples_grad -= samples_grad.mean(-1, keepdims=True)
         return samples, samples_grad
 
