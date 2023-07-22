@@ -1,7 +1,7 @@
 Dirichlet Diffusion Score Model 
 ==============
 
-This repo contains the official implementation for the paper [Dirichlet diffusion score model for biological sequence generation](https://arxiv.org/abs/2305.10699). 
+This repo contains the official implementation for the paper [Dirichlet diffusion score model for biological sequence generation](https://arxiv.org/abs/2305.10699) published in ICML 2023. 
 
 **Dirichlet Diffusion Score Model (DDSM)** is a continuous-time diffusion framework designed specificaly for modeling discrete data such as biological
 sequences. We introduce a diffusion process defined in probability simplex space with stationary distribution being the Dirichlet distribution. This makes diffusion in continuous space natural for modeling discrete data. DDSM is the first approach for discrete data modeling with continuous-time  stochastic differential equation (SDE) diffusion in probability simplex space.
@@ -47,7 +47,7 @@ DDSM is distributed under a BSD-3-Clause license. See the [LICENSE file](LICENSE
 
 Credits
 -------
-DDSM is developed in [Jian Zhou's lab at UTSW](https://zhoulab.io/).
+DDSM is developed in [Zhou lab at UTSW](https://zhoulab.io/).
 
 * Pavel Avdeyev
 * Chenlai Shi
@@ -55,12 +55,22 @@ DDSM is developed in [Jian Zhou's lab at UTSW](https://zhoulab.io/).
 * Kseniia Dudnyk
 * Jian Zhou
 
-Publications
+Publication
 ------------
 Pavel Avdeyev, Chenlai Shi, Yuhao Tan, Kseniia Dudnyk and Jian Zhou. "Dirichlet diffusion score model for biological sequence generation".
 
+#### To cite this work
+```
+@InProceedings{avdeyev2023dirichlet,
+  title = {{D}irichlet {D}iffusion {S}core {M}odel for biological sequence generation},
+  author = {Avdeyev, Pavel and Shi, Chenlai and Tan, Yuhao and Dudnyk, Kseniia and Zhou, Jian},
+  url = {https://arxiv.org/abs/2305.10699},
+  booktitle = {International Conference on Machine Learning},
+  year = {2023},
+}
+```
 How to get help
 ---------------
-The preferred way of asking questions about DDSM is the [discussions tab](https://github.com/jzhoulab/ddsm/discussions). Before posting an question, consider to look through the existing threads - it is possible that your question has already been answered. For report any bugs, please use the issues tracker.
+The preferred way of asking questions about DDSM is the [discussions tab](https://github.com/jzhoulab/ddsm/discussions). Before posting a question, consider looking through the existing threads - it is possible that your question has already been answered. To report any bugs, please use the issues tracker.
 
 In case you prefer personal communication, please contact Pavel at Pavel.Avdeev(at)UTSouthwestern.edu or  Jian at Jian.Zhou(at)UTSouthwestern.edu.
