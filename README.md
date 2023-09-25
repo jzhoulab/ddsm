@@ -6,6 +6,8 @@ This repo contains the official implementation for the paper [Dirichlet diffusio
 **Dirichlet Diffusion Score Model (DDSM)** is a continuous-time diffusion framework designed specificaly for modeling discrete data such as biological
 sequences. We introduce a diffusion process defined in probability simplex space with stationary distribution being the Dirichlet distribution. This makes diffusion in continuous space natural for modeling discrete data. DDSM is the first approach for discrete data modeling with continuous-time  stochastic differential equation (SDE) diffusion in probability simplex space.
 
+We showed that DDSM is capable of [solving Sudoku](https://github.com/jzhoulab/ddsm/tree/main/sudoku) and [designing promoter sequences](https://github.com/jzhoulab/ddsm/tree/main/promoter_design) according to transcription initiation signals. 
+
 The Jax version of the code will be published soon. 
 
 Installation instructions
@@ -23,6 +25,15 @@ Tutorial
 An example notebook containing code for applying a toy model to binarized MNIST dataset is [here](https://github.com/jzhoulab/ddsm/blob/main/toy_example_bin_mnist.ipynb).
 
 [Usage.md](USAGE.md) contains detailed information how to use other scripts provided in the repository. 
+
+Time dilation
+-------------
+Time dilation is a generally applicable technique (not just for DDSM) for improving diffusion sample quality and is very easy to implement. It can be easily applied to other SDE-based diffusion models as well. It simply involves adding a c factor to the reverse diffusion process (c>1).
+<img width="751" alt="image" src="https://github.com/jzhoulab/ddsm/assets/8333155/ebe1f91e-16a3-4aa7-9b8a-bc900191d53a">
+
+Time dilation works by biasing sampling toward higher-density areas, which often correspond to better-quality samples. It is advisable to increase the number of reverse diffusion steps by c, but it is not always necessary. 
+
+Another useful trick is to introduce time dilation only in the later part of reverse diffusion sampling, since it will avoid biasing sampling globally (e.g. in MNIST generation task, sampling more ones because one is the most frequent digit in MNIST) and only bias sampling locally(e.g. better digit image quality)
 
 Benchmarks
 ----------
