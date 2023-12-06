@@ -90,6 +90,9 @@ class MemmapGenome(Genome):
             input_path, blacklist_regions=blacklist_regions, bases_order=bases_order,
         )
         self.memmapfile = memmapfile
+        self.initialized = None
+        self.input_path = input_path
+        self.blacklist_regions = blacklist_regions
         if init_unpicklable:
             self._unpicklable_init()
 
