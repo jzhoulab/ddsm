@@ -16,7 +16,15 @@ Please create a new conda or pip environment specifically for running DDSM.
 
 DDSM requires Python packages PyTorch (>=1.0). You can follow PyTorch installation steps [here](https://pytorch.org/get-started/locally/). 
 
-If you plan to run promoter designer model, DDSM requires Selene (>=0.5.0). You can follow Selene installation steps [here](https://github.com/FunctionLab/selene).
+If you plan to run promoter designer model, DDSM requires [Selene](https://github.com/FunctionLab/selene) (>=0.5.0). For smoother experience, we recommend to install Selene via the following commands: 
+```bash
+git clone https://github.com/kathyxchen/selene.git
+cd selene
+git checkout custom_target_support
+python setup.py build_ext --inplace
+python setup.py install 
+```
+It may be needed to install some packages prior installation of Selene via these commands but the process should be straightforward.  
 
 Input data for sudoku and promoter designer experiment as well as model weights with the best performance can be downloaded from [Zenodo](https://doi.org/10.5281/zenodo.7943307) 
 
